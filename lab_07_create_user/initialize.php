@@ -1,16 +1,14 @@
-<?php
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-session_start();
+$host = getenv('DB_HOST') ?: 'localhost';
+$user = getenv('DB_USER') ?: 'root';
+$pass = getenv('DB_PASS') ?: '';
+$db   = getenv('DB_NAME') ?: 'defaultdb';
+$port = getenv('DB_PORT') ?: 3306;
 
-$host = "localhost";
-$user = "root";
-$password = "";
-$database = "lab_app";
+$conn = mysqli_init();
 
-$connection = new mysqli($host, $user, $password, $database);
+// Check for ca.pem in the current folder or parent folder
+$ca_path = file_exists(__DIR__ . '/ca.pem') ? __DIR__ . '/ca.pem' : __DIR__ . '/../ca.pem';
+$conn->ssl_set(NULL, NULL, $ca_path, NULL, NULL);
 
-if($connection->connect_error) {
-    die("Connection failed: " . $connection->connect_error);
-}
-?>
+// Connect to Aiven cloud database
+$conn->real_connect($host, $user, $pass, $db, (int)$port, NULL, MYSQLI_CLIENT_SSL);
