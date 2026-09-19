@@ -1,4 +1,8 @@
-<?php include 'initialize.php'; ?>
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+?>
 <!DOCTYPE html>
 <html lang="en" data-theme="winter">
 <head>
@@ -22,23 +26,23 @@
             <form method="POST" action="user_add_data.php" class="space-y-4">
                 <div class="form-control">
                     <label class="label"><span class="label-text font-semibold">Firstname</span></label>
-                    <input type="text" name="firstname" class="input input-bordered w-full" />
+                    <input type="text" name="firstname" class="input input-bordered w-full" required />
                 </div>
                 <div class="form-control">
                     <label class="label"><span class="label-text font-semibold">Lastname</span></label>
-                    <input type="text" name="lastname" class="input input-bordered w-full" />
+                    <input type="text" name="lastname" class="input input-bordered w-full" required />
                 </div>
                 <div class="form-control">
                     <label class="label"><span class="label-text font-semibold">Username</span></label>
-                    <input type="text" name="username" class="input input-bordered w-full" />
+                    <input type="text" name="username" class="input input-bordered w-full" required />
                 </div>
                 <div class="form-control">
                     <label class="label"><span class="label-text font-semibold">Password</span></label>
-                    <input type="password" name="password" class="input input-bordered w-full" />
+                    <input type="password" name="password" class="input input-bordered w-full" required />
                 </div>
                 <div class="form-control">
                     <label class="label"><span class="label-text font-semibold">Confirm Password</span></label>
-                    <input type="password" name="confirm_password" class="input input-bordered w-full" />
+                    <input type="password" name="confirm_password" class="input input-bordered w-full" required />
                 </div>
                 <div class="form-control mt-6">
                     <button type="submit" class="btn btn-primary w-full">Add User</button>
