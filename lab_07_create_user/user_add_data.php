@@ -8,12 +8,10 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// 1. Check if initialize.php actually exists in this folder
-if (!file_exists('initialize.php')) {
+if (!file_exists(__DIR__ . '/initialize.php')) {
     die("CRITICAL ERROR: initialize.php is missing from the lab_07_create_user folder. Please copy it from Lab 08 into Lab 07.");
 }
-
-include 'initialize.php';
+require_once __DIR__ . '/initialize.php';
 
 // 2. Check if the database connection was successfully created
 if (!isset($connection)) {
