@@ -1,12 +1,6 @@
 {
   "functions": {
-    "api/**/*.php": {
-      "runtime": "vercel-php@0.7.4"
-    },
-    "lab_07_create_user/*.php": {
-      "runtime": "vercel-php@0.7.4"
-    },
-    "lab_08_read_user_records/*.php": {
+    "**/*.php": {
       "runtime": "vercel-php@0.7.4"
     }
   },
