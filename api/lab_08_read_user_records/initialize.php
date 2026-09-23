@@ -3,9 +3,8 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Load local environment variables if the file exists (ignored by GitHub)
-if (file_exists(__DIR__ . '/../local_env.php')) {
-    include_once __DIR__ . '/../local_env.php';
+if (file_exists('../../local_env.php')) {
+    include '../../local_env.php';
 }
 // 1. Credentials from Environment Variables (Vercel) or Defaults
 $host = trim(getenv('DB_HOST') ?: 'mysql-22f856ab-ernestlenard1234-479d.c.aivencloud.com');
