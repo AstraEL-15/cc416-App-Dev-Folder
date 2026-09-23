@@ -1,12 +1,25 @@
 <?php 
+// Force session cookie to be accessible everywhere
+session_set_cookie_params(['path' => '/']);
 session_start();
 
-// SECURITY CHECK: Kick unlogged users back to Lab 11
+// DIAGNOSTIC CHECK: Stop the redirect and see what survived the jump
 if (!isset($_SESSION['user_id'])) {
-    header('Location: ../lab_11_login_sessions/login.php');
+    echo "<div style='font-family: sans-serif; padding: 2rem;'>";
+    echo "<h1 style='color: red;'>🚨 SESSION DROP DETECTED</h1>";
+    echo "<p>You successfully logged in, but Vercel lost the session memory during the jump from Lab 11 to Lab 08.</p>";
+    
+    echo "<h3>What the server currently remembers (Session):</h3>";
+    echo "<pre style='background: #eee; padding: 10px;'>" . print_r($_SESSION, true) . "</pre>";
+    
+    echo "<h3>What your browser sent (Cookies):</h3>";
+    echo "<pre style='background: #eee; padding: 10px;'>" . print_r($_COOKIE, true) . "</pre>";
+    
+    echo "</div>";
     exit;
 }
 
+// If it makes it past here, the session works!
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
