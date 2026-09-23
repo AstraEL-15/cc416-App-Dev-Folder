@@ -5,27 +5,26 @@ if (!isset($_COOKIE['lab12_user_id'])) {
 }
 include 'initialize.php';
 
-$user_id = $_GET['user-id'] ?? '';
+// 1. Fetch ID using $_POST instead of $_GET
+$user_id = $_POST['user-id'] ?? '';
 $firstname = $_POST['firstname'] ?? '';
 $lastname = $_POST['lastname'] ?? '';
 $username = $_POST['username'] ?? '';
-$password = $_POST['password'] ?? '';
-$confirm = $_POST['confirm_password'] ?? '';
 
-if (empty($firstname) || empty($lastname) || empty($username) || empty($password)) {
-    header("Location: user_edit.php?user-id=$user_id&error=" . urlencode("All fields are required"));
-    exit;
-} elseif ($password !== $confirm) {
-    header("Location: user_edit.php?user-id=$user_id&error=" . urlencode("Passwords do not match"));
+// 2. Validate that the required fields (including the hidden ID) are not empty
+if (empty($user_id) || empty($firstname) || empty($lastname) || empty($username)) {
+    // 3. Redirect back to the records page instead of the old edit page
+    header("Location: user_records.php?error=" . urlencode("All fields are required"));
     exit;
 } else {
-    $sql = "UPDATE users SET username='$username', password='$password', firstname='$firstname', lastname='$lastname' WHERE id='$user_id'";
+    // 4. Update the user data (excluding password, since the modal doesn't provide one)
+    $sql = "UPDATE users SET username='$username', firstname='$firstname', lastname='$lastname' WHERE id='$user_id'";
     
     if ($connection->query($sql) === TRUE) {
-        header('Location: user_records.php?msg=' . urlencode("Record updated successfully"));
+        header('Location: user_records.php?msg=' . urlencode("User updated successfully"));
         exit;
     } else {
-        header("Location: user_edit.php?user-id=$user_id&error=" . urlencode("Error updating record: " . $connection->error));
+        header("Location: user_records.php?error=" . urlencode("Error updating record: " . $connection->error));
         exit;
     }
 }
