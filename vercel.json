@@ -12,10 +12,7 @@
     "api/lab_12_final_user_management_system/user_delete.php": { "runtime": "vercel-php@0.7.4" }
   },
   "routes": [
-    { "src": "/", "dest": "/api/lab_12_final_user_management_system/index.php" },
-    { "src": "/lab_12_final_user_management_system/?$", "dest": "/api/lab_12_final_user_management_system/index.php" },
-    { "src": "/lab_12_final_user_management_system/(.*)", "dest": "/api/lab_12_final_user_management_system/$1" },
-    { "src": "/api/lab_12_final_user_management_system/?$", "dest": "/api/lab_12_final_user_management_system/index.php" },
-    { "src": "/api/lab_12_final_user_management_system/(.*)", "dest": "/api/lab_12_final_user_management_system/$1" }
+    { "src": "/", "dest": "/api/lab_12_final_user_management_system/login.php" },
+    { "src": "/(.*)", "dest": "/api/lab_12_final_user_management_system/$1" }
   ]
 }
