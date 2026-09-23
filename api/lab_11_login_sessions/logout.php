@@ -1,13 +1,14 @@
 <?php
+// Destroy the cookies
+setcookie("user_id", "", time() - 3600, "/");
+setcookie("username", "", time() - 3600, "/");
+
+// Destroy any lingering local folder sessions just in case
 session_start();
-
-// Unset all session variables
 session_unset();
-
-// Destroy the session completely
 session_destroy();
 
-// Redirect back to the login page
+// Send them back to the door
 header('Location: login.php');
 exit;
 ?>

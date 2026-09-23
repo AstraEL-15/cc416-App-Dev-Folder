@@ -6,12 +6,10 @@ $password = $_POST['password'] ?? '';
 
 if (empty($username)) {
     $_SESSION['alert_message'] = "Username is required";
-    session_write_close();
     header('Location: login.php');
     exit;
 } elseif (empty($password)) {
     $_SESSION['alert_message'] = "Password is required";
-    session_write_close();
     header('Location: login.php');
     exit;
 } else {
@@ -20,18 +18,15 @@ if (empty($username)) {
     $row = mysqli_fetch_assoc($result);
 
     if ($row) {
-        $_SESSION['user_id'] = $row['id'];
-        $_SESSION['username'] = $row['username'];
+        // Set cookies that last for 1 day, available across all folders ("/")
+        setcookie("user_id", $row['id'], time() + 86400, "/");
+        setcookie("username", $row['username'], time() + 86400, "/");
         
-        // Force PHP to save session data before redirecting on Vercel
-        session_write_close();
-        
-        // STEP OUT OF LAB 11 AND INTO LAB 08
+        // Step out of Lab 11 and into Lab 08
         header('Location: ../lab_08_read_user_records/user_records.php');
         exit;
     } else {
         $_SESSION['alert_message'] = "Username and Password not found!";
-        session_write_close();
         header('Location: login.php');
         exit;
     }
