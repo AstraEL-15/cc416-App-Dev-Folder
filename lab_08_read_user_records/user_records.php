@@ -1,4 +1,8 @@
-<?php include 'initialize.php'; ?>
+<?php 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+include 'initialize.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -61,7 +65,8 @@
                                 <td class="py-4 px-6 text-gray-600"><?php echo htmlspecialchars($row['firstname']); ?></td>
                                 <td class="py-4 px-6 text-gray-600"><?php echo htmlspecialchars($row['lastname']); ?></td>
                                 <td class="py-4 px-6 text-right space-x-3">
-                                    <a href="user_edit.php?user-id=<?php echo $row['id']; ?>" class="text-blue-600 hover:text-blue-800 font-semibold text-sm transition-colors">Edit</a>
+                                    <!-- Updated to relative path targeting lab_07 -->
+                                    <a href="../lab_07_create_user/user_edit.php?user-id=<?php echo $row['id']; ?>" class="text-blue-600 hover:text-blue-800 font-semibold text-sm transition-colors">Edit</a>
                                     <span class="text-gray-300">|</span>
                                     <button onclick="deleteRecord(<?php echo $row['id']; ?>)" class="text-red-500 hover:text-red-700 font-semibold text-sm transition-colors">Delete</button>
                                 </td>
@@ -83,7 +88,8 @@
 <script>
     function deleteRecord(id) {
         if (confirm("Are you sure you want to delete this user?")) {
-            window.location.href = "user_delete.php?user-id=" + id;
+            // Updated to relative path targeting lab_07
+            window.location.href = "../lab_07_create_user/user_delete.php?user-id=" + id;
         }
     }
 </script>

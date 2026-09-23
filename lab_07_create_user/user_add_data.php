@@ -60,10 +60,10 @@ if (!empty($error_message)) {
 
     if (mysqli_query($connection, $sql)) {
         $_SESSION['alert_message'] = "User added successfully!";
-        // JavaScript redirect bypasses Vercel 403 header proxy limitations
+        // Use a relative path so it respects the School_Projects folder locally
         echo "<script>
                 alert('User added successfully!');
-                window.location.href = '/lab_08_read_user_records/user_records.php';
+                window.location.href = '../lab_08_read_user_records/user_records.php';
               </script>";
         exit();
     } else {
