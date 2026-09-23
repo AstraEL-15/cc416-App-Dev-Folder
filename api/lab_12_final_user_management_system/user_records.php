@@ -1,165 +1,149 @@
-<?php
-require_once 'initialize.php';
-
-// Ensure user is authenticated
-if (!isset($_COOKIE['lab12_user_session'])) {
+ <?php
+if (!isset($_COOKIE['lab12_user_id'])) {
     header('Location: login.php');
     exit;
 }
-
-// Fetch user records
-$stmt = $pdo->query("SELECT id, username, email, role, created_at FROM users ORDER BY id DESC");
-$users = $stmt->fetchAll(PDO_FETCH_ASSOC);
+include 'initialize.php';
 ?>
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Lab 12</title>
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <title>Lab 12 - Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.0/dist/full.css" rel="stylesheet" type="text/css" />
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-base-200 min-h-screen flex">
 
-    <!-- Pinned Left Sidebar -->
-    <aside class="w-64 bg-base-100 shadow-2xl flex flex-col justify-between h-screen sticky top-0 p-4 border-r border-base-300">
+    <!-- Sidebar Panel -->
+    <aside class="w-64 bg-base-100 shadow-2xl flex flex-col justify-between h-screen sticky top-0 border-r border-base-300">
         <div>
-            <!-- Header Brand -->
-            <div class="flex items-center gap-3 px-2 py-4 mb-6 border-b border-base-300">
-                <div class="p-2 bg-primary text-primary-content rounded-lg font-black text-xl">
-                    ⚡
-                </div>
-                <div>
-                    <h1 class="font-bold text-lg leading-tight">Admin Portal</h1>
-                    <span class="text-xs text-base-content/60">Lab 12 System</span>
-                </div>
+            <!-- Brand / User Info -->
+            <div class="p-6 border-b border-base-300 bg-primary/5">
+                <h2 class="text-2xl font-black text-primary">Admin Panel</h2>
+                <p class="text-sm mt-3 text-base-content/80">
+                    Welcome back,<br>
+                    <span class="font-bold text-lg text-base-content"><?php echo htmlspecialchars($_COOKIE['lab12_username']); ?></span>
+                </p>
             </div>
 
-            <!-- Navigation Actions -->
-            <ul class="menu p-0 gap-2">
+            <!-- Sidebar Navigation -->
+            <ul class="menu p-4 w-full gap-2 text-base">
                 <li>
-                    <a class="active bg-primary text-primary-content font-medium">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-                        Dashboard
-                    </a>
+                    <a href="user_records.php" class="active bg-primary text-primary-content shadow-sm">Dashboard</a>
                 </li>
                 <li>
-                    <button type="button" onclick="document.getElementById('add_user_modal').showModal()" class="hover:bg-base-200 text-base-content font-medium">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                        Add New User
+                    <!-- Triggers the Add User Modal -->
+                    <button type="button" onclick="document.getElementById('add_user_modal').showModal()" class="text-base-content hover:bg-base-200 mt-2 font-medium">
+                        + Add New User
                     </button>
                 </li>
             </ul>
         </div>
 
-        <!-- Logout Anchored to Bottom -->
-        <div class="pt-4 border-t border-base-300">
-            <a href="logout.php" class="btn btn-error btn-outline w-full flex justify-between items-center">
-                <span>Logout</span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-            </a>
+        <!-- Bottom Logout -->
+        <div class="p-4 border-t border-base-300">
+            <a href="logout.php" class="btn btn-error btn-outline w-full font-bold">Logout</a>
         </div>
     </aside>
 
-    <!-- Main Content Area (Middle) -->
-    <main class="flex-1 p-8 overflow-y-auto">
-        <!-- Dashboard Top Bar -->
-        <div class="flex justify-between items-center mb-8">
-            <div>
-                <h2 class="text-2xl font-bold">User Management Dashboard</h2>
-                <p class="text-sm text-base-content/60">Overview of registered accounts</p>
+    <!-- Main Dashboard Content -->
+    <main class="flex-1 p-10 overflow-y-auto">
+        <div class="max-w-5xl mx-auto">
+            <!-- Page Header -->
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold">User Records</h2>
             </div>
-            <div class="stat bg-base-100 shadow-md rounded-box w-auto py-2 px-6 border border-base-300">
-                <div class="stat-title text-xs">Total Users</div>
-                <div class="stat-value text-primary text-2xl"><?php echo count($users); ?></div>
-            </div>
-        </div>
 
-        <!-- Users Table -->
-        <div class="card bg-base-100 shadow-xl border border-base-300">
-            <div class="card-body p-0">
-                <div class="overflow-x-auto">
-                    <table class="table table-zebra w-full">
-                        <thead>
-                            <tr class="bg-base-200/50">
-                                <th>ID</th>
-                                <th>User</th>
-                                <th>Role</th>
-                                <th>Created At</th>
-                                <th class="text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($users as $user): ?>
-                            <tr class="hover">
-                                <td class="font-bold opacity-50">#<?php echo htmlspecialchars($user['id']); ?></td>
-                                <td>
-                                    <div class="font-bold"><?php echo htmlspecialchars($user['username']); ?></div>
-                                    <div class="text-xs opacity-50"><?php echo htmlspecialchars($user['email']); ?></div>
-                                </td>
-                                <td>
-                                    <span class="badge <?php echo $user['role'] === 'admin' ? 'badge-secondary' : 'badge-ghost'; ?> badge-sm uppercase font-semibold">
-                                        <?php echo htmlspecialchars($user['role']); ?>
-                                    </span>
-                                </td>
-                                <td class="text-sm opacity-70"><?php echo htmlspecialchars($user['created_at']); ?></td>
-                                <td class="text-right space-x-2">
-                                    <!-- In-Page Edit Button -->
-                                    <button 
-                                        type="button"
-                                        onclick='openEditModal(<?php echo json_encode($user); ?>)' 
-                                        class="btn btn-sm btn-warning btn-square btn-outline" 
-                                        title="Edit User">
-                                        ✏️
-                                    </button>
+            <!-- Alerts -->
+            <?php if (isset($_GET['msg'])): ?>
+                <div class="alert alert-success shadow-lg rounded-xl mb-6 text-white">
+                    <span><?php echo htmlspecialchars($_GET['msg']); ?></span>
+                </div>
+            <?php endif; ?>
+
+            <?php if (isset($_GET['error'])): ?>
+                <div class="alert alert-error shadow-lg rounded-xl mb-6 text-white">
+                    <span><?php echo htmlspecialchars($_GET['error']); ?></span>
+                </div>
+            <?php endif; ?>
+
+            <!-- Data Table -->
+            <div class="card bg-base-100 shadow-xl border border-base-300">
+                <div class="card-body p-0">
+                    <div class="overflow-x-auto">
+                        <table class="table table-zebra w-full text-base">
+                            <thead class="bg-base-200 text-base-content text-sm">
+                                <tr>
+                                    <th>Username</th>
+                                    <th>First Name</th>
+                                    <th>Last Name</th>
+                                    <th class="text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                $query = "SELECT * FROM users";
+                                $result = mysqli_query($connection, $query);
+                                while ($row = mysqli_fetch_assoc($result)) {
+                                    echo "<tr>";
+                                    echo "<td class='font-medium'>" . htmlspecialchars($row['username']) . "</td>";
+                                    echo "<td>" . htmlspecialchars($row['firstname']) . "</td>";
+                                    echo "<td>" . htmlspecialchars($row['lastname']) . "</td>";
                                     
-                                    <!-- Delete Form -->
-                                    <form action="user_delete.php" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this user?');">
-                                        <input type="hidden" name="id" value="<?php echo $user['id']; ?>">
-                                        <button type="submit" class="btn btn-sm btn-error btn-square btn-outline" title="Delete User">
-                                            🗑️
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
+                                    // Package user data safely into JSON for the Edit Modal
+                                    $userData = htmlspecialchars(json_encode([
+                                        'id' => $row['id'],
+                                        'username' => $row['username'],
+                                        'firstname' => $row['firstname'],
+                                        'lastname' => $row['lastname']
+                                    ]), ENT_QUOTES, 'UTF-8');
+
+                                    echo "<td class='text-right space-x-2'>";
+                                    // In-page Edit Button
+                                    echo "<button type='button' onclick='openEditModal($userData)' class='btn btn-warning btn-sm'>Edit</button>";
+                                    // Original Delete Link (Untampered)
+                                    echo "<a href='user_delete.php?user-id=" . $row['id'] . "' class='btn btn-error btn-sm' onclick=\"return confirm('Are you sure you want to delete this user?');\">Delete</a>";
+                                    echo "</td>";
+                                    echo "</tr>";
+                                }
+                                ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- IN-PAGE MODAL: ADD USER -->
+    <!-- IN-PAGE MODAL: ADD NEW USER -->
     <dialog id="add_user_modal" class="modal">
         <div class="modal-box">
             <form method="dialog">
                 <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
             </form>
-            <h3 class="font-bold text-lg mb-4">Add New User</h3>
+            <h3 class="font-bold text-2xl mb-6">Add New User</h3>
+            
             <form action="user_add_data.php" method="POST" class="space-y-4">
-                <div>
-                    <label class="label"><span class="label-text">Username</span></label>
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-semibold">Username</span></label>
                     <input type="text" name="username" class="input input-bordered w-full" required />
                 </div>
-                <div>
-                    <label class="label"><span class="label-text">Email</span></label>
-                    <input type="email" name="email" class="input input-bordered w-full" required />
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-semibold">First Name</span></label>
+                    <input type="text" name="firstname" class="input input-bordered w-full" required />
                 </div>
-                <div>
-                    <label class="label"><span class="label-text">Password</span></label>
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-semibold">Last Name</span></label>
+                    <input type="text" name="lastname" class="input input-bordered w-full" required />
+                </div>
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-semibold">Password</span></label>
                     <input type="password" name="password" class="input input-bordered w-full" required />
                 </div>
-                <div>
-                    <label class="label"><span class="label-text">Role</span></label>
-                    <select name="role" class="select select-bordered w-full">
-                        <option value="user">User</option>
-                        <option value="admin">Admin</option>
-                    </select>
-                </div>
-                <div class="modal-action">
-                    <button type="submit" class="btn btn-primary w-full">Create User</button>
+                <div class="modal-action mt-6">
+                    <button type="submit" class="btn btn-primary w-full text-lg">Save User</button>
                 </div>
             </form>
         </div>
@@ -171,38 +155,38 @@ $users = $stmt->fetchAll(PDO_FETCH_ASSOC);
             <form method="dialog">
                 <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
             </form>
-            <h3 class="font-bold text-lg mb-4">Edit User</h3>
+            <h3 class="font-bold text-2xl mb-6">Edit User</h3>
+            
             <form action="user_edit_data.php" method="POST" class="space-y-4">
-                <input type="hidden" name="id" id="edit_id">
-                <div>
-                    <label class="label"><span class="label-text">Username</span></label>
+                <!-- Hidden input passes the ID to your existing POST handler -->
+                <input type="hidden" name="user-id" id="edit_id">
+                
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-semibold">Username</span></label>
                     <input type="text" name="username" id="edit_username" class="input input-bordered w-full" required />
                 </div>
-                <div>
-                    <label class="label"><span class="label-text">Email</span></label>
-                    <input type="email" name="email" id="edit_email" class="input input-bordered w-full" required />
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-semibold">First Name</span></label>
+                    <input type="text" name="firstname" id="edit_firstname" class="input input-bordered w-full" required />
                 </div>
-                <div>
-                    <label class="label"><span class="label-text">Role</span></label>
-                    <select name="role" id="edit_role" class="select select-bordered w-full">
-                        <option value="user">User</option>
-                        <option value="admin">Admin</option>
-                    </select>
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-semibold">Last Name</span></label>
+                    <input type="text" name="lastname" id="edit_lastname" class="input input-bordered w-full" required />
                 </div>
-                <div class="modal-action">
-                    <button type="submit" class="btn btn-warning w-full">Save Changes</button>
+                <div class="modal-action mt-6">
+                    <button type="submit" class="btn btn-warning w-full text-lg">Update User</button>
                 </div>
             </form>
         </div>
     </dialog>
 
-    <!-- Modal Population Script -->
+    <!-- JavaScript to populate the Edit Modal dynamically -->
     <script>
         function openEditModal(user) {
             document.getElementById('edit_id').value = user.id;
             document.getElementById('edit_username').value = user.username;
-            document.getElementById('edit_email').value = user.email;
-            document.getElementById('edit_role').value = user.role || 'user';
+            document.getElementById('edit_firstname').value = user.firstname;
+            document.getElementById('edit_lastname').value = user.lastname;
             document.getElementById('edit_user_modal').showModal();
         }
     </script>
