@@ -92,18 +92,19 @@ include 'initialize.php';
                                     echo "<td>" . htmlspecialchars($row['firstname']) . "</td>";
                                     echo "<td>" . htmlspecialchars($row['lastname']) . "</td>";
                                     
-                                    // Package user data safely into JSON for the Edit Modal
-                                    $userData = htmlspecialchars(json_encode([
-                                        'id' => $row['id'],
-                                        'username' => $row['username'],
-                                        'firstname' => $row['firstname'],
-                                        'lastname' => $row['lastname']
-                                    ]), ENT_QUOTES, 'UTF-8');
-
                                     echo "<td class='text-right space-x-2'>";
-                                    // In-page Edit Button
-                                    echo "<button type='button' onclick='openEditModal($userData)' class='btn btn-warning btn-sm'>Edit</button>";
-                                    // Original Delete Link (Untampered)
+                                    
+                                    // Prepare variables safely for JavaScript
+                                    $id = $row['id'];
+                                    $username = addslashes($row['username']);
+                                    $firstname = addslashes($row['firstname']);
+                                    $lastname = addslashes($row['lastname']);
+                                    
+                                    // THIS IS WHERE YOUR BUTTON GOES:
+                                    // We echo the HTML button and inject the PHP variables into the openEditModal function
+                                    echo "<button type='button' onclick=\"openEditModal($id, '$username', '$firstname', '$lastname')\" class='btn btn-warning btn-sm'>Edit</button>";
+                                    
+                                    // Original Delete Link
                                     echo "<a href='user_delete.php?user-id=" . $row['id'] . "' class='btn btn-error btn-sm' onclick=\"return confirm('Are you sure you want to delete this user?');\">Delete</a>";
                                     echo "</td>";
                                     echo "</tr>";
@@ -182,13 +183,18 @@ include 'initialize.php';
 
     <!-- JavaScript to populate the Edit Modal dynamically -->
     <script>
-        function openEditModal(user) {
-            document.getElementById('edit_id').value = user.id;
-            document.getElementById('edit_username').value = user.username;
-            document.getElementById('edit_firstname').value = user.firstname;
-            document.getElementById('edit_lastname').value = user.lastname;
-            document.getElementById('edit_user_modal').showModal();
-        }
+    function openEditModal(id, username, firstname, lastname) {
+        // Fill the hidden ID input so the PHP script knows who to update
+        document.getElementById('edit_id').value = id;
+        
+        // Pre-fill the visible text inputs so the user sees their current data
+        document.getElementById('edit_username').value = username;
+        document.getElementById('edit_firstname').value = firstname;
+        document.getElementById('edit_lastname').value = lastname;
+        
+        // Open the DaisyUI modal
+        document.getElementById('edit_user_modal').showModal();
+    }
     </script>
 </body>
 </html>
