@@ -4,7 +4,8 @@
     "api/lab_07_create_user/user_add_data.php": { "runtime": "vercel-php@0.7.4" },
     "api/lab_07_create_user/user_edit.php": { "runtime": "vercel-php@0.7.4" },
     "api/lab_07_create_user/user_delete.php": { "runtime": "vercel-php@0.7.4" },
-    "api/lab_08_read_user_records/user_records.php": { "runtime": "vercel-php@0.7.4" }
+    "api/lab_08_read_user_records/user_records.php": { "runtime": "vercel-php@0.7.4" },
+    "api/lab_09_update_user/user_edit_data.php": { "runtime": "vercel-php@0.7.4" }
   },
   "routes": [
     { "src": "/", "dest": "/api/lab_08_read_user_records/user_records.php" },
