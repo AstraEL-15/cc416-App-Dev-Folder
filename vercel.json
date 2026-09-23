@@ -4,15 +4,22 @@
     "api/lab_07_create_user/user_add_data.php": { "runtime": "vercel-php@0.7.4" },
     "api/lab_07_create_user/user_edit.php": { "runtime": "vercel-php@0.7.4" },
     "api/lab_07_create_user/user_delete.php": { "runtime": "vercel-php@0.7.4" },
-    "api/lab_08_read_user_records/user_records.php": { "runtime": "vercel-php@0.7.4" },
-    "api/lab_09_update_user/user_edit_data.php": { "runtime": "vercel-php@0.7.4" }
+    "api/lab_08_read_user_records/user_records.php": { "runtime": "vercel-php@0.7.4" }
   },
   "routes": [
     { "src": "/", "dest": "/api/lab_08_read_user_records/user_records.php" },
     { "src": "/lab_08_read_user_records/user_records.php", "dest": "/api/lab_08_read_user_records/user_records.php" },
+    { "src": "/lab_08_read_user_records/?$", "dest": "/api/lab_08_read_user_records/user_records.php" },
     { "src": "/lab_07_create_user/user_add.php", "dest": "/api/lab_07_create_user/user_add.php" },
     { "src": "/lab_07_create_user/user_add_data.php", "dest": "/api/lab_07_create_user/user_add_data.php" },
+    { "src": "/lab_07_create_user/user_edit.php", "dest": "/api/lab_07_create_user/user_edit.php" },
     { "src": "/lab_07_create_user/user_delete.php", "dest": "/api/lab_07_create_user/user_delete.php" },
+    { "src": "/lab_07_create_user/?$", "dest": "/api/lab_07_create_user/user_add.php" },
+    { "src": "/api/lab_08_read_user_records/user_records.php", "dest": "/api/lab_08_read_user_records/user_records.php" },
+    { "src": "/api/lab_07_create_user/user_add.php", "dest": "/api/lab_07_create_user/user_add.php" },
+    { "src": "/api/lab_07_create_user/user_add_data.php", "dest": "/api/lab_07_create_user/user_add_data.php" },
+    { "src": "/api/lab_07_create_user/user_edit.php", "dest": "/api/lab_07_create_user/user_edit.php" },
+    { "src": "/api/lab_07_create_user/user_delete.php", "dest": "/api/lab_07_create_user/user_delete.php" },
     { "src": "/lab_09_update_user/user_edit_data.php", "dest": "/api/lab_09_update_user/user_edit_data.php" }
   ]
 }
