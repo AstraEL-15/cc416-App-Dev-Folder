@@ -1,13 +1,18 @@
 {
-  "functions": {
-    "api/index.php": {
-      "runtime": "vercel-php@0.7.4"
-    }
-  },
-  "rewrites": [
+  "builds": [
     {
-      "source": "/(.*)",
-      "destination": "/api/index.php"
+      "src": "lab_07_create_user/*.php",
+      "use": "vercel-php@0.7.4"
+    },
+    {
+      "src": "lab_08_read_user_records/*.php",
+      "use": "vercel-php@0.7.4"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/",
+      "dest": "/lab_07_create_user/user_add.php"
     }
   ]
 }
