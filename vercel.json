@@ -1,29 +1,18 @@
 {
   "functions": {
-    "api/**/*.php": {
-      "runtime": "vercel-php@0.7.4"
-    }
+    "api/lab_12_final_user_management_system/index.php": { "runtime": "vercel-php@0.7.4" },
+    "api/lab_12_final_user_management_system/login.php": { "runtime": "vercel-php@0.7.4" },
+    "api/lab_12_final_user_management_system/auth.php": { "runtime": "vercel-php@0.7.4" },
+    "api/lab_12_final_user_management_system/logout.php": { "runtime": "vercel-php@0.7.4" },
+    "api/lab_12_final_user_management_system/user_records.php": { "runtime": "vercel-php@0.7.4" },
+    "api/lab_12_final_user_management_system/user_add.php": { "runtime": "vercel-php@0.7.4" },
+    "api/lab_12_final_user_management_system/user_add_data.php": { "runtime": "vercel-php@0.7.4" },
+    "api/lab_12_final_user_management_system/user_edit.php": { "runtime": "vercel-php@0.7.4" },
+    "api/lab_12_final_user_management_system/user_edit_data.php": { "runtime": "vercel-php@0.7.4" },
+    "api/lab_12_final_user_management_system/user_delete.php": { "runtime": "vercel-php@0.7.4" }
   },
   "routes": [
-    { "src": "/", "dest": "/api/lab_08_read_user_records/user_records.php" },
-    { "src": "/lab_08_read_user_records/user_records.php", "dest": "/api/lab_08_read_user_records/user_records.php" },
-    { "src": "/lab_08_read_user_records/?$", "dest": "/api/lab_08_read_user_records/user_records.php" },
-    { "src": "/lab_07_create_user/user_add.php", "dest": "/api/lab_07_create_user/user_add.php" },
-    { "src": "/lab_07_create_user/user_add_data.php", "dest": "/api/lab_07_create_user/user_add_data.php" },
-    { "src": "/lab_07_create_user/user_edit.php", "dest": "/api/lab_07_create_user/user_edit.php" },
-    { "src": "/lab_07_create_user/user_delete.php", "dest": "/api/lab_07_create_user/user_delete.php" },
-    { "src": "/lab_07_create_user/?$", "dest": "/api/lab_07_create_user/user_add.php" },
-    { "src": "/api/lab_08_read_user_records/user_records.php", "dest": "/api/lab_08_read_user_records/user_records.php" },
-    { "src": "/api/lab_07_create_user/user_add.php", "dest": "/api/lab_07_create_user/user_add.php" },
-    { "src": "/api/lab_07_create_user/user_add_data.php", "dest": "/api/lab_07_create_user/user_add_data.php" },
-    { "src": "/api/lab_07_create_user/user_edit.php", "dest": "/api/lab_07_create_user/user_edit.php" },
-    { "src": "/api/lab_07_create_user/user_delete.php", "dest": "/api/lab_07_create_user/user_delete.php" },
-    { "src": "/lab_09_update_user/user_edit_data.php", "dest": "/api/lab_09_update_user/user_edit_data.php" },
-    { "src": "/lab_10_delete_user/user_delete.php", "dest": "/api/lab_10_delete_user/user_delete.php" },
-    { "src": "/lab_11_login_sessions/login.php", "dest": "/api/lab_11_login_sessions/login.php" },
-    { "src": "/lab_11_login_sessions/auth.php", "dest": "/api/lab_11_login_sessions/auth.php" },
-    { "src": "/lab_11_login_sessions/dashboard.php", "dest": "/api/lab_11_login_sessions/dashboard.php" },
-    { "src": "/lab_11_login_sessions/logout.php", "dest": "/api/lab_11_login_sessions/logout.php" },
+    { "src": "/", "dest": "/api/lab_12_final_user_management_system/index.php" },
     { "src": "/lab_12_final_user_management_system/?$", "dest": "/api/lab_12_final_user_management_system/index.php" },
     { "src": "/lab_12_final_user_management_system/(.*)", "dest": "/api/lab_12_final_user_management_system/$1" },
     { "src": "/api/lab_12_final_user_management_system/?$", "dest": "/api/lab_12_final_user_management_system/index.php" },
