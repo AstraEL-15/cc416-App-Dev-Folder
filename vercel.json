@@ -10,7 +10,8 @@
     "api/lab_11_login_sessions/login.php": { "runtime": "vercel-php@0.7.4" },
     "api/lab_11_login_sessions/auth.php": { "runtime": "vercel-php@0.7.4" },
     "api/lab_11_login_sessions/dashboard.php": { "runtime": "vercel-php@0.7.4" },
-    "api/lab_11_login_sessions/logout.php": { "runtime": "vercel-php@0.7.4" }
+    "api/lab_11_login_sessions/logout.php": { "runtime": "vercel-php@0.7.4" },
+    "/api/lab_12_final_user_management_system/(.*)": { "runtime": "vercel-php@0.7.4" }
   },
   "routes": [
     { "src": "/", "dest": "/api/lab_08_read_user_records/user_records.php" },
@@ -31,6 +32,7 @@
     { "src": "/lab_11_login_sessions/login.php", "dest": "/api/lab_11_login_sessions/login.php" },
     { "src": "/lab_11_login_sessions/auth.php", "dest": "/api/lab_11_login_sessions/auth.php" },
     { "src": "/lab_11_login_sessions/dashboard.php", "dest": "/api/lab_11_login_sessions/dashboard.php" },
-    { "src": "/lab_11_login_sessions/logout.php", "dest": "/api/lab_11_login_sessions/logout.php" }
+    { "src": "/lab_11_login_sessions/logout.php", "dest": "/api/lab_11_login_sessions/logout.php" },
+    { "src": "/lab_12_final_user_management_system/(.*)", "dest": "/api/lab_12_final_user_management_system/$1" }
   ]
 }
