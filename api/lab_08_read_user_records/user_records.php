@@ -197,12 +197,17 @@ include 'initialize.php';
     }
 
     // Populate and open the Edit View
+    // Populate and open the Edit View
     function openEditView(id, firstname, lastname, username) {
         // Inject the PHP data into the Edit form inputs
         document.getElementById('edit-id').value = id;
         document.getElementById('edit-firstname').value = firstname;
         document.getElementById('edit-lastname').value = lastname;
         document.getElementById('edit-username').value = username;
+        
+        // NEW: Dynamically update the form's action URL to point to Lab 9 and include the ID
+        const editForm = document.querySelector('#view-edit-user form');
+        editForm.action = `../lab_09_update_user/user_edit_data.php?user-id=${id}`;
         
         // Show the Edit panel
         toggleView('edit-user');
