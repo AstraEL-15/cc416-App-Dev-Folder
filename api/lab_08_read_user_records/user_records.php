@@ -70,7 +70,7 @@ include 'initialize.php';
                         <tbody>
                             <?php
                             $query = "SELECT * FROM users";
-                            $result = mysqli_query($connection, $query);
+                            $result = mysqli_query($connection,$query);
                             if ($result && mysqli_num_rows($result) > 0) {
                                 while ($row = mysqli_fetch_assoc($result)) {
                             ?>
@@ -80,7 +80,6 @@ include 'initialize.php';
                                     <td><?php echo htmlspecialchars($row['lastname']); ?></td>
                                     <td>
                                         <div class="flex justify-center gap-2">
-                                            <!-- NEW: JavaScript Edit Button instead of an a-tag link -->
                                             <button onclick="openEditView(
                                                 '<?php echo $row['id']; ?>', 
                                                 '<?php echo addslashes(htmlspecialchars($row['firstname'])); ?>', 
@@ -153,9 +152,8 @@ include 'initialize.php';
 
             <div class="card bg-base-200 shadow-xl border border-base-300">
                 <div class="card-body">
-                    <!-- Note: Ensure this action matches your actual backend edit processor file -->
-                    <form method="POST" action="../lab_07_create_user/user_edit.php" class="space-y-4">
-                        <!-- Hidden ID field to tell the database which user to update -->
+                    <!-- ADDED: id="edit-form" -->
+                    <form id="edit-form" method="POST" action="../lab_07_create_user/user_edit.php" class="space-y-4">
                         <input type="hidden" name="user-id" id="edit-id" />
                         
                         <div class="form-control">
@@ -171,7 +169,6 @@ include 'initialize.php';
                             <input type="text" name="username" id="edit-username" class="input input-bordered bg-base-100 w-full" required />
                         </div>
                         
-                        <!-- Optional password fields for edit -->
                         <div class="form-control">
                             <label class="label"><span class="label-text font-semibold">New Password (Leave blank to keep current)</span></label>
                             <input type="password" name="password" class="input input-bordered bg-base-100 w-full" />
@@ -189,27 +186,75 @@ include 'initialize.php';
     </main>
 
 <script>
-    // Delete Confirmation Logic
+    // 1. Check for custom alerts on page load and display them
+    document.addEventListener("DOMContentLoaded", () => {
+        const alertMsg = sessionStorage.getItem("customAlert");
+        if (alertMsg) {
+            // Create the DaisyUI alert exactly matching your PHP one
+            const alertHTML = `
+            <div class="alert alert-info shadow-lg rounded-xl mb-6 text-white font-medium flex items-center alert-dismissible" id="js-alert">
+                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>${alertMsg}</span>
+            </div>`;
+            
+            // Insert it at the top of the main container
+            const main = document.querySelector('main');
+            main.insertAdjacentHTML('afterbegin', alertHTML);
+            
+            // Clear the storage so it only shows once
+            sessionStorage.removeItem("customAlert");
+
+            // Optional: Auto-hide the alert after 3 seconds for a slicker feel
+            setTimeout(() => {
+                const alertElement = document.getElementById('js-alert');
+                if(alertElement) alertElement.remove();
+            }, 3000);
+        }
+    });
+
+    // Modern Background Delete
     function deleteRecord(id) {
         if (confirm("Are you sure you want to delete this user?")) {
-            window.location.href = "../lab_07_create_user/user_delete.php?user-id=" + id;
+            fetch(`../lab_10_delete_user/user_delete.php?user-id=${id}`)
+                .then(() => {
+                    // Set our custom success message before reloading
+                    sessionStorage.setItem("customAlert", "User was successfully deleted.");
+                    window.location.reload();
+                })
+                .catch(err => console.error("Error deleting:", err));
         }
     }
 
-    // Populate and open the Edit View
+    // Modern Background Edit
+    document.getElementById('edit-form').addEventListener('submit', function(e) {
+        e.preventDefault(); 
+        
+        const formData = new FormData(this);
+        const actionUrl = this.action; 
+        
+        // Grab the username they just typed in so we can personalize the alert!
+        const updatedUsername = document.getElementById('edit-username').value;
+
+        fetch(actionUrl, {
+            method: 'POST',
+            body: formData
+        }).then(() => {
+            // Set the personalized message: e.g., "johndoe is updated!"
+            sessionStorage.setItem("customAlert", `${updatedUsername} has been successfully updated!`);
+            window.location.reload();
+        }).catch(err => console.error("Error updating:", err));
+    });
+
     // Populate and open the Edit View
     function openEditView(id, firstname, lastname, username) {
-        // Inject the PHP data into the Edit form inputs
         document.getElementById('edit-id').value = id;
         document.getElementById('edit-firstname').value = firstname;
         document.getElementById('edit-lastname').value = lastname;
         document.getElementById('edit-username').value = username;
         
-        // NEW: Dynamically update the form's action URL to point to Lab 9 and include the ID
-        const editForm = document.querySelector('#view-edit-user form');
+        const editForm = document.getElementById('edit-form');
         editForm.action = `../lab_09_update_user/user_edit_data.php?user-id=${id}`;
         
-        // Show the Edit panel
         toggleView('edit-user');
     }
 
@@ -219,11 +264,9 @@ include 'initialize.php';
         const btnDashboard = document.getElementById('btn-dashboard');
         const btnAddUser = document.getElementById('btn-add-user');
 
-        // Hide all views first, then show the requested one
         views.forEach(v => document.getElementById('view-' + v).classList.add('hidden'));
         document.getElementById('view-' + view).classList.remove('hidden');
 
-        // Update active states on the sidebar
         if (view === 'dashboard') {
             btnDashboard.classList.add('active');
             btnAddUser.classList.remove('active');
@@ -231,7 +274,6 @@ include 'initialize.php';
             btnAddUser.classList.add('active');
             btnDashboard.classList.remove('active');
         } else if (view === 'edit-user') {
-            // Remove active states from both if we are in the edit screen
             btnDashboard.classList.remove('active');
             btnAddUser.classList.remove('active');
         }
