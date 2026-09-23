@@ -1,29 +1,38 @@
-<?php include 'initialize.php'; ?>
 <?php
-$username = $_POST['username'];
-$password = $_POST['password'];
+include 'initialize.php';
 
-if(empty($username)) {
+$username = $_POST['username'] ?? '';
+$password = $_POST['password'] ?? '';
+
+if (empty($username)) {
     $_SESSION['alert_message'] = "Username is required";
+    session_write_close();
     header('Location: login.php');
-}
-elseif(empty($password)) {
+    exit;
+} elseif (empty($password)) {
     $_SESSION['alert_message'] = "Password is required";
+    session_write_close();
     header('Location: login.php');
-}
-else {
+    exit;
+} else {
     $query = "SELECT * FROM users WHERE username='".$username."' AND password='".$password."'";
     $result = mysqli_query($connection, $query);
     $row = mysqli_fetch_assoc($result);
 
-    if($row) {
+    if ($row) {
         $_SESSION['user_id'] = $row['id'];
         $_SESSION['username'] = $row['username'];
+        
+        // Force PHP to save session data before redirecting on Vercel
+        session_write_close();
+        
         header('Location: dashboard.php');
-    }
-    else {
+        exit;
+    } else {
         $_SESSION['alert_message'] = "Username and Password not found!";
+        session_write_close();
         header('Location: login.php');
+        exit;
     }
 }
 ?>
