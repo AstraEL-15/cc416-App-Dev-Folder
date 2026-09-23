@@ -22,10 +22,10 @@ if (!isset($connection)) {
     }
 }
 
-$firstname = $_POST['firstname'] ?? '';
-$lastname = $_POST['lastname'] ?? '';
-$username = $_POST['username'] ?? '';
-$password = $_POST['password'] ?? '';
+$firstname        = trim($_POST['firstname'] ?? '');
+$lastname         = trim($_POST['lastname'] ?? '');
+$username         = trim($_POST['username'] ?? '');
+$password         = $_POST['password'] ?? '';
 $confirm_password = $_POST['confirm_password'] ?? '';
 
 $error_message = null;
@@ -46,19 +46,29 @@ if (empty($firstname)) {
 
 if (!empty($error_message)) {
     $_SESSION['alert_message'] = $error_message;
-    header('Location: user_add.php');
+    echo "<script>window.location.href = 'user_add.php';</script>";
     exit();
 } else {
+    // Sanitize input variables to prevent SQL injection and Vercel WAF payload flags
+    $firstname_clean = mysqli_real_escape_string($connection, $firstname);
+    $lastname_clean  = mysqli_real_escape_string($connection, $lastname);
+    $username_clean  = mysqli_real_escape_string($connection, $username);
+    $password_clean  = mysqli_real_escape_string($connection, $password);
+
     $sql = "INSERT INTO users (firstname, lastname, username, password) 
-            VALUES ('$firstname', '$lastname', '$username', '$password')";
+            VALUES ('$firstname_clean', '$lastname_clean', '$username_clean', '$password_clean')";
 
     if (mysqli_query($connection, $sql)) {
         $_SESSION['alert_message'] = "User added successfully!";
-        header('Location: ../lab_08_read_user_records/user_records.php');
+        // JavaScript redirect bypasses Vercel 403 header proxy limitations
+        echo "<script>
+                alert('User added successfully!');
+                window.location.href = '/lab_08_read_user_records/user_records.php';
+              </script>";
         exit();
     } else {
         $_SESSION['alert_message'] = "Error adding user: " . mysqli_error($connection);
-        header('Location: user_add.php');
+        echo "<script>window.location.href = 'user_add.php';</script>";
         exit();
     }
 }
