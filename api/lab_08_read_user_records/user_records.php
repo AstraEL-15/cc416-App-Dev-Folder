@@ -80,7 +80,14 @@ include 'initialize.php';
                                     <td><?php echo htmlspecialchars($row['lastname']); ?></td>
                                     <td>
                                         <div class="flex justify-center gap-2">
-                                            <a href="../lab_07_create_user/user_edit.php?user-id=<?php echo $row['id']; ?>" class="btn btn-sm btn-info btn-outline">Edit</a>
+                                            <!-- NEW: JavaScript Edit Button instead of an a-tag link -->
+                                            <button onclick="openEditView(
+                                                '<?php echo $row['id']; ?>', 
+                                                '<?php echo addslashes(htmlspecialchars($row['firstname'])); ?>', 
+                                                '<?php echo addslashes(htmlspecialchars($row['lastname'])); ?>', 
+                                                '<?php echo addslashes(htmlspecialchars($row['username'])); ?>'
+                                            )" class="btn btn-sm btn-info btn-outline">Edit</button>
+                                            
                                             <button onclick="deleteRecord(<?php echo $row['id']; ?>)" class="btn btn-sm btn-error btn-outline">Delete</button>
                                         </div>
                                     </td>
@@ -99,7 +106,7 @@ include 'initialize.php';
             </div>
         </div>
 
-        <!-- VIEW 2: ADD USER FORM (Hidden by default) -->
+        <!-- VIEW 2: ADD USER FORM -->
         <div id="view-add-user" class="hidden max-w-md mx-auto">
             <div class="mb-8 text-center">
                 <h2 class="text-3xl font-extrabold text-primary">Create New User</h2>
@@ -108,7 +115,6 @@ include 'initialize.php';
 
             <div class="card bg-base-200 shadow-xl border border-base-300">
                 <div class="card-body">
-                    <!-- Form still submits to your existing processor file! -->
                     <form method="POST" action="../lab_07_create_user/user_add_data.php" class="space-y-4">
                         <div class="form-control">
                             <label class="label"><span class="label-text font-semibold">Firstname</span></label>
@@ -138,6 +144,48 @@ include 'initialize.php';
             </div>
         </div>
 
+        <!-- VIEW 3: EDIT USER FORM (New Panel) -->
+        <div id="view-edit-user" class="hidden max-w-md mx-auto">
+            <div class="mb-8 text-center">
+                <h2 class="text-3xl font-extrabold text-info">Edit User</h2>
+                <p class="text-base-content/70 mt-1">Update existing user information.</p>
+            </div>
+
+            <div class="card bg-base-200 shadow-xl border border-base-300">
+                <div class="card-body">
+                    <!-- Note: Ensure this action matches your actual backend edit processor file -->
+                    <form method="POST" action="../lab_07_create_user/user_edit.php" class="space-y-4">
+                        <!-- Hidden ID field to tell the database which user to update -->
+                        <input type="hidden" name="user-id" id="edit-id" />
+                        
+                        <div class="form-control">
+                            <label class="label"><span class="label-text font-semibold">Firstname</span></label>
+                            <input type="text" name="firstname" id="edit-firstname" class="input input-bordered bg-base-100 w-full" required />
+                        </div>
+                        <div class="form-control">
+                            <label class="label"><span class="label-text font-semibold">Lastname</span></label>
+                            <input type="text" name="lastname" id="edit-lastname" class="input input-bordered bg-base-100 w-full" required />
+                        </div>
+                        <div class="form-control">
+                            <label class="label"><span class="label-text font-semibold">Username</span></label>
+                            <input type="text" name="username" id="edit-username" class="input input-bordered bg-base-100 w-full" required />
+                        </div>
+                        
+                        <!-- Optional password fields for edit -->
+                        <div class="form-control">
+                            <label class="label"><span class="label-text font-semibold">New Password (Leave blank to keep current)</span></label>
+                            <input type="password" name="password" class="input input-bordered bg-base-100 w-full" />
+                        </div>
+
+                        <div class="form-control mt-6 flex flex-row gap-2">
+                            <button type="button" class="btn btn-neutral w-1/3" onclick="toggleView('dashboard')">Cancel</button>
+                            <button type="submit" class="btn btn-info w-2/3">Update User</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
     </main>
 
 <script>
@@ -148,23 +196,39 @@ include 'initialize.php';
         }
     }
 
-    // Toggle between Dashboard and Add User panels
+    // Populate and open the Edit View
+    function openEditView(id, firstname, lastname, username) {
+        // Inject the PHP data into the Edit form inputs
+        document.getElementById('edit-id').value = id;
+        document.getElementById('edit-firstname').value = firstname;
+        document.getElementById('edit-lastname').value = lastname;
+        document.getElementById('edit-username').value = username;
+        
+        // Show the Edit panel
+        toggleView('edit-user');
+    }
+
+    // Toggle between Dashboard, Add, and Edit panels
     function toggleView(view) {
-        const dashboardView = document.getElementById('view-dashboard');
-        const addUserView = document.getElementById('view-add-user');
+        const views = ['dashboard', 'add-user', 'edit-user'];
         const btnDashboard = document.getElementById('btn-dashboard');
         const btnAddUser = document.getElementById('btn-add-user');
 
+        // Hide all views first, then show the requested one
+        views.forEach(v => document.getElementById('view-' + v).classList.add('hidden'));
+        document.getElementById('view-' + view).classList.remove('hidden');
+
+        // Update active states on the sidebar
         if (view === 'dashboard') {
-            dashboardView.classList.remove('hidden');
-            addUserView.classList.add('hidden');
             btnDashboard.classList.add('active');
             btnAddUser.classList.remove('active');
         } else if (view === 'add-user') {
-            addUserView.classList.remove('hidden');
-            dashboardView.classList.add('hidden');
             btnAddUser.classList.add('active');
             btnDashboard.classList.remove('active');
+        } else if (view === 'edit-user') {
+            // Remove active states from both if we are in the edit screen
+            btnDashboard.classList.remove('active');
+            btnAddUser.classList.remove('active');
         }
     }
 </script>
