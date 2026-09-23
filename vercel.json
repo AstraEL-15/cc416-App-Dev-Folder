@@ -8,7 +8,15 @@
   "routes": [
     {
       "src": "/",
-      "dest": "/api/lab_07_create_user/user_add.php"
+      "dest": "/api/lab_08_read_user_records/user_records.php"
+    },
+    {
+      "src": "/lab_08_read_user_records/(.*)",
+      "dest": "/api/lab_08_read_user_records/$1"
+    },
+    {
+      "src": "/lab_07_create_user/(.*)",
+      "dest": "/api/lab_07_create_user/$1"
     }
   ]
 }
