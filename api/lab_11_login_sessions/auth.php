@@ -26,7 +26,8 @@ if (empty($username)) {
         // Force PHP to save session data before redirecting on Vercel
         session_write_close();
         
-        header('Location: dashboard.php');
+        // STEP OUT OF LAB 11 AND INTO LAB 08
+        header('Location: ../lab_08_read_user_records/user_records.php');
         exit;
     } else {
         $_SESSION['alert_message'] = "Username and Password not found!";

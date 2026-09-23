@@ -6,7 +6,7 @@ $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
 // 2. Redirect root visitors to Lab 07
 if ($uri === '/' || $uri === '') {
-    header("Location: /lab_07_create_user/user_add.php");
+    header("Location: lab_11_login_sessions/login.php");
     exit();
 }
 

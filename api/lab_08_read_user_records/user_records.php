@@ -1,4 +1,12 @@
 <?php 
+session_start();
+
+// SECURITY CHECK: Kick unlogged users back to Lab 11
+if (!isset($_SESSION['user_id'])) {
+    header('Location: ../lab_11_login_sessions/login.php');
+    exit;
+}
+
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -33,6 +41,14 @@ include 'initialize.php';
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
                     Add User
                 </a>
+            </li>
+            
+            <!-- NEW LOGOUT BUTTON -->
+            <li class="mt-auto pt-8">
+            <a href="../lab_11_login_sessions/logout.php" class="text-error hover:bg-error hover:text-error-content">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+            Logout
+             </a>
             </li>
         </ul>
     </aside>
