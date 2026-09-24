@@ -56,8 +56,8 @@ $countResult = mysqli_query($connection, $countQuery);$totalRecords = mysqli_fet
     </aside>
 
     <!-- Main Dashboard Content -->
-    <main class="flex-1 p-10 overflow-y-auto">
-        <div class="max-w-5xl mx-auto">
+    <main class="flex-1 p-10 overflow-y-auto flex flex-col">
+       <div class="max-w-5xl mx-auto w-full flex-1 flex flex-col">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-3xl font-bold">User Records</h2>
             </div>
@@ -129,7 +129,7 @@ $countResult = mysqli_query($connection, $countQuery);$totalRecords = mysqli_fet
             </div>
 
             <!-- Pagination Wrapper for JavaScript -->
-            <div id="pagination-wrapper">
+            <div id="pagination-wrapper" class="mt-auto pb-4">
                 <?php if ($totalPages > 1): ?>
                 <div class="flex justify-center mt-8">
                     <div class="join">
@@ -213,47 +213,66 @@ $countResult = mysqli_query($connection, $countQuery);$totalRecords = mysqli_fet
     <script>
     // EDIT MODAL FUNCTION
     function openEditModal(id, username, firstname, lastname) {
-        document.getElementById('edit_id').value = id;
-        document.getElementById('edit_username').value = username;
-        document.getElementById('edit_firstname').value = firstname;
-        document.getElementById('edit_lastname').value = lastname;
-        document.getElementById('edit_user_modal').showModal();
-    }
+    document.getElementById('edit_id').value = id;
+    document.getElementById('edit_username').value = username;
+    document.getElementById('edit_firstname').value = firstname;
+    document.getElementById('edit_lastname').value = lastname;
+    document.getElementById('edit_user_modal').showModal();
+}
 
-    // LIVE SEARCH FUNCTION
+    // LIVE SEARCH WITH SKELETON LOADING
     let typingTimer;
     const searchInput = document.getElementById('searchInput');
 
-    searchInput.addEventListener('input', function() {
-        // Clear the timer every time the user hits a key
-        clearTimeout(typingTimer);
-        
-        // Wait 300ms after they stop typing before asking the database
-        typingTimer = setTimeout(() => {
-            const searchTerm = searchInput.value;
-            
-            // Update the URL in the browser without reloading the page
-            const newUrl = new URL(window.location);
-            newUrl.searchParams.set('search', searchTerm);
-            newUrl.searchParams.set('page', 1); // Reset to page 1 on new search
-            window.history.pushState({}, '', newUrl);
+    // 1. Define what our skeleton rows look like
+    const skeletonHTML = `
+        <tr>
+            <td><div class="skeleton h-4 w-32"></div></td>
+            <td><div class="skeleton h-4 w-24"></div></td>
+            <td><div class="skeleton h-4 w-24"></div></td>
+            <td class="text-right space-x-2">
+             <div class="skeleton h-8 w-12 inline-block rounded-lg"></div>
+             <div class="skeleton h-8 w-16 inline-block rounded-lg"></div>
+        </td>
+    </tr>
+`.repeat(5); // Show 5 fake rows while loading
 
-            // Fetch the new HTML in the background
-            fetch(`user_records.php?search=${encodeURIComponent(searchTerm)}`)
-                .then(response => response.text())
-                .then(html => {
-                    // Convert the HTML string into an actual DOM we can read
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-                    
-                    // Swap out the table body
-                    document.getElementById('table-body').innerHTML = doc.getElementById('table-body').innerHTML;
-                    
-                    // Swap out the pagination numbers
-                    document.getElementById('pagination-wrapper').innerHTML = doc.getElementById('pagination-wrapper').innerHTML;
-                });
-        }, 300);
-    });
-    </script>
+searchInput.addEventListener('input', function() {
+    clearTimeout(typingTimer);
+    
+    // 2. Immediately show skeletons and fade pagination
+    document.getElementById('table-body').innerHTML = skeletonHTML;
+    document.getElementById('pagination-wrapper').style.opacity = '0.5';
+    document.getElementById('pagination-wrapper').style.pointerEvents = 'none'; // Prevent clicking
+    
+    // 3. Wait 300ms before fetching new data
+    typingTimer = setTimeout(() => {
+        const searchTerm = searchInput.value;
+        
+        // Update URL
+        const newUrl = new URL(window.location);
+        newUrl.searchParams.set('search', searchTerm);
+        newUrl.searchParams.set('page', 1);
+        window.history.pushState({}, '', newUrl);
+
+        // Fetch real data
+        fetch(`user_records.php?search=${encodeURIComponent(searchTerm)}`)
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                // Swap skeletons for real data
+                document.getElementById('table-body').innerHTML = doc.getElementById('table-body').innerHTML;
+                
+                // Restore pagination
+                const paginationWrap = document.getElementById('pagination-wrapper');
+                paginationWrap.innerHTML = doc.getElementById('pagination-wrapper').innerHTML;
+                paginationWrap.style.opacity = '1';
+                paginationWrap.style.pointerEvents = 'auto';
+            });
+    }, 300);
+});
+</script>
 </body>
 </html>
