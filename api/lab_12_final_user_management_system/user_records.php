@@ -127,28 +127,33 @@ include 'initialize.php';
             <h3 class="font-bold text-2xl mb-6">Add New User</h3>
             
             <form action="user_add_data.php" method="POST" class="space-y-4">
+             <div class="form-control">
+             <label class="label"><span class="label-text font-semibold">Username</span></label>
+               <input type="text" name="username" class="input input-bordered w-full" required />
+               </div>
                 <div class="form-control">
-                    <label class="label"><span class="label-text font-semibold">Username</span></label>
-                    <input type="text" name="username" class="input input-bordered w-full" required />
-                </div>
-                <div class="form-control">
-                    <label class="label"><span class="label-text font-semibold">First Name</span></label>
-                    <input type="text" name="firstname" class="input input-bordered w-full" required />
-                </div>
-                <div class="form-control">
-                    <label class="label"><span class="label-text font-semibold">Last Name</span></label>
-                    <input type="text" name="lastname" class="input input-bordered w-full" required />
+                <label class="label"><span class="label-text font-semibold">First Name</span></label>
+                <input type="text" name="firstname" class="input input-bordered w-full" required />
                 </div>
                 <div class="form-control">
-                    <label class="label"><span class="label-text font-semibold">Password</span></label>
-                    <input type="password" name="password" class="input input-bordered w-full" required />
+                <label class="label"><span class="label-text font-semibold">Last Name</span></label>
+                <input type="text" name="lastname" class="input input-bordered w-full" required />
                 </div>
-                <div class="modal-action mt-6">
-                    <button type="submit" class="btn btn-primary w-full text-lg">Save User</button>
+                <div class="form-control">
+                <label class="label"><span class="label-text font-semibold">Password</span></label>
+               <input type="password" name="password" class="input input-bordered w-full" required />
                 </div>
-            </form>
-        </div>
-    </dialog>
+                <!-- NEW: Confirm Password Field -->
+             <div class="form-control">
+               <label class="label"><span class="label-text font-semibold">Confirm Password</span></label>
+               <input type="password" name="confirm_password" class="input input-bordered w-full" required />
+             </div>
+               <div class="modal-action mt-6">
+                <button type="submit" class="btn btn-primary w-full text-lg">Save User</button>
+                </div>
+                </form>
+               </div>
+                </dialog>
 
     <!-- IN-PAGE MODAL: EDIT USER -->
     <dialog id="edit_user_modal" class="modal">

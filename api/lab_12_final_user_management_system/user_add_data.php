@@ -1,4 +1,8 @@
 <?php
+if (!isset($_COOKIE['lab12_user_id'])) { 
+    header('Location: login.php'); 
+    exit; 
+}
 include 'initialize.php';
 
 $firstname = $_POST['firstname'] ?? '';
@@ -7,22 +11,25 @@ $username = $_POST['username'] ?? '';
 $password = $_POST['password'] ?? '';
 $confirm = $_POST['confirm_password'] ?? '';
 
-if (empty($firstname) || empty($lastname) || empty($username) || empty($password)) {
-    header('Location: user_add.php?error=' . urlencode("All fields are required"));
+// 1. Check if ANY field is empty
+if (empty($firstname) || empty($lastname) || empty($username) || empty($password) || empty($confirm)) {
+    header("Location: user_records.php?error=" . urlencode("All fields are required to create a user"));
     exit;
-} elseif ($password !== $confirm) {
-    header('Location: user_add.php?error=' . urlencode("Passwords do not match"));
+} 
+// 2. Check if passwords match
+elseif ($password !== $confirm) {
+    header("Location: user_records.php?error=" . urlencode("Passwords do not match"));
     exit;
-} else {
-    $sql = "INSERT INTO users (firstname, lastname, username, password) VALUES ('$firstname', '$lastname', '$username', '$password')";
+} 
+// 3. Save the user
+else {
+    $sql = "INSERT INTO users (username, password, firstname, lastname) VALUES ('$username', '$password', '$firstname', '$lastname')";
     
     if ($connection->query($sql) === TRUE) {
-        // If logged in, go to dashboard. If not, go to login.
-        $dest = isset($_COOKIE['lab12_user_id']) ? 'user_records.php' : 'login.php';
-        header("Location: $dest?msg=" . urlencode("New user created successfully!"));
+        header('Location: user_records.php?msg=' . urlencode("New user created successfully!"));
         exit;
     } else {
-        header('Location: user_add.php?error=' . urlencode("Database error: " . $connection->error));
+        header("Location: user_records.php?error=" . urlencode("Error creating user: " . $connection->error));
         exit;
     }
 }
