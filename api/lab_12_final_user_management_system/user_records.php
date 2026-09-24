@@ -4,6 +4,27 @@ if (!isset($_COOKIE['lab12_user_id'])) {
     exit;
 }
 include 'initialize.php';
+
+// --- SEARCH & PAGINATION SETUP ---
+// 1. Get the current search term if there is one
+$search = isset($_GET['search']) ? mysqli_real_escape_string($connection, $_GET['search']) : '';
+
+// 2. Figure out what page we are on (default to 1)
+$page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 1;
+$limit = 10; // Show 10 people at a time
+$offset = ($page - 1) * $limit;
+
+// 3. Build the search filter for our SQL queries
+$whereClause = "";
+if (!empty($search)) {
+    $whereClause = "WHERE username LIKE '%$search%' OR firstname LIKE '%$search%' OR lastname LIKE '%$search%'";
+}
+
+// 4. Count total users (so we know how many page numbers to generate)
+$countQuery = "SELECT COUNT(*) as total FROM users $whereClause";
+$countResult = mysqli_query($connection, $countQuery);
+$totalRecords = mysqli_fetch_assoc($countResult)['total'];
+$totalPages = ceil($totalRecords / $limit);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -34,7 +55,6 @@ include 'initialize.php';
                     <a href="user_records.php" class="active bg-primary text-primary-content shadow-sm">Dashboard</a>
                 </li>
                 <li>
-                    <!-- Triggers the Add User Modal -->
                     <button type="button" onclick="document.getElementById('add_user_modal').showModal()" class="text-base-content hover:bg-base-200 mt-2 font-medium">
                         + Add New User
                     </button>
@@ -52,7 +72,7 @@ include 'initialize.php';
     <main class="flex-1 p-10 overflow-y-auto">
         <div class="max-w-5xl mx-auto">
             <!-- Page Header -->
-            <div class="flex justify-between items-center mb-8">
+            <div class="flex justify-between items-center mb-6">
                 <h2 class="text-3xl font-bold">User Records</h2>
             </div>
 
@@ -69,6 +89,15 @@ include 'initialize.php';
                 </div>
             <?php endif; ?>
 
+            <!-- Search Bar -->
+            <form method="GET" action="user_records.php" class="flex gap-2 mb-6">
+                <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>" placeholder="Search by name or username..." class="input input-bordered w-full max-w-md" />
+                <button type="submit" class="btn btn-primary">Search</button>
+                <?php if(!empty($search)): ?>
+                    <a href="user_records.php" class="btn btn-outline">Clear</a>
+                <?php endif; ?>
+            </form>
+
             <!-- Data Table -->
             <div class="card bg-base-100 shadow-xl border border-base-300">
                 <div class="card-body p-0">
@@ -84,30 +113,32 @@ include 'initialize.php';
                             </thead>
                             <tbody>
                                 <?php
-                                $query = "SELECT * FROM users";
+                                // 5. Get the actual users, alphabetized (ASC), with limits applied
+                                $query = "SELECT * FROM users $whereClause ORDER BY username ASC LIMIT $limit OFFSET $offset";
                                 $result = mysqli_query($connection, $query);
-                                while ($row = mysqli_fetch_assoc($result)) {
-                                    echo "<tr>";
-                                    echo "<td class='font-medium'>" . htmlspecialchars($row['username']) . "</td>";
-                                    echo "<td>" . htmlspecialchars($row['firstname']) . "</td>";
-                                    echo "<td>" . htmlspecialchars($row['lastname']) . "</td>";
-                                    
-                                    echo "<td class='text-right space-x-2'>";
-                                    
-                                    // Prepare variables safely for JavaScript
-                                    $id = $row['id'];
-                                    $username = addslashes($row['username']);
-                                    $firstname = addslashes($row['firstname']);
-                                    $lastname = addslashes($row['lastname']);
-                                    
-                                    // THIS IS WHERE YOUR BUTTON GOES:
-                                    // We echo the HTML button and inject the PHP variables into the openEditModal function
-                                    echo "<button type='button' onclick=\"openEditModal($id, '$username', '$firstname', '$lastname')\" class='btn btn-warning btn-sm'>Edit</button>";
-                                    
-                                    // Original Delete Link
-                                    echo "<a href='user_delete.php?user-id=" . $row['id'] . "' class='btn btn-error btn-sm' onclick=\"return confirm('Are you sure you want to delete this user?');\">Delete</a>";
-                                    echo "</td>";
-                                    echo "</tr>";
+                                
+                                if (mysqli_num_rows($result) > 0) {
+                                    while ($row = mysqli_fetch_assoc($result)) {
+                                        echo "<tr>";
+                                        echo "<td class='font-medium'>" . htmlspecialchars($row['username']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($row['firstname']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($row['lastname']) . "</td>";
+                                        
+                                        echo "<td class='text-right space-x-2'>";
+                                        
+                                        $id = $row['id'];
+                                        $username = addslashes($row['username']);
+                                        $firstname = addslashes($row['firstname']);
+                                        $lastname = addslashes($row['lastname']);
+                                        
+                                        // Edit & Delete Buttons
+                                        echo "<button type='button' onclick=\"openEditModal($id, '$username', '$firstname', '$lastname')\" class='btn btn-warning btn-sm'>Edit</button>";
+                                        echo "<a href='user_delete.php?user-id=" . $row['id'] . "' class='btn btn-error btn-sm' onclick=\"return confirm('Are you sure you want to delete this user?');\">Delete</a>";
+                                        echo "</td>";
+                                        echo "</tr>";
+                                    }
+                                } else {
+                                    echo "<tr><td colspan='4' class='text-center py-4 text-base-content/60'>No users found.</td></tr>";
                                 }
                                 ?>
                             </tbody>
@@ -115,6 +146,21 @@ include 'initialize.php';
                     </div>
                 </div>
             </div>
+
+            <!-- Pagination (The numbers underneath) -->
+            <?php if ($totalPages > 1): ?>
+            <div class="flex justify-center mt-8">
+                <div class="join">
+                    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                        <a href="?page=<?php echo $i; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>" 
+                           class="join-item btn <?php echo $i === $page ? 'btn-active' : ''; ?>">
+                            <?php echo $i; ?>
+                        </a>
+                    <?php endfor; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+
         </div>
     </main>
 
@@ -127,33 +173,33 @@ include 'initialize.php';
             <h3 class="font-bold text-2xl mb-6">Add New User</h3>
             
             <form action="user_add_data.php" method="POST" class="space-y-4">
-             <div class="form-control">
-             <label class="label"><span class="label-text font-semibold">Username</span></label>
-               <input type="text" name="username" class="input input-bordered w-full" required />
-               </div>
                 <div class="form-control">
-                <label class="label"><span class="label-text font-semibold">First Name</span></label>
-                <input type="text" name="firstname" class="input input-bordered w-full" required />
+                    <label class="label"><span class="label-text font-semibold">Username</span></label>
+                    <input type="text" name="username" class="input input-bordered w-full" required />
                 </div>
                 <div class="form-control">
-                <label class="label"><span class="label-text font-semibold">Last Name</span></label>
-                <input type="text" name="lastname" class="input input-bordered w-full" required />
+                    <label class="label"><span class="label-text font-semibold">First Name</span></label>
+                    <input type="text" name="firstname" class="input input-bordered w-full" required />
                 </div>
                 <div class="form-control">
-                <label class="label"><span class="label-text font-semibold">Password</span></label>
-               <input type="password" name="password" class="input input-bordered w-full" required />
+                    <label class="label"><span class="label-text font-semibold">Last Name</span></label>
+                    <input type="text" name="lastname" class="input input-bordered w-full" required />
                 </div>
-                <!-- NEW: Confirm Password Field -->
-             <div class="form-control">
-               <label class="label"><span class="label-text font-semibold">Confirm Password</span></label>
-               <input type="password" name="confirm_password" class="input input-bordered w-full" required />
-             </div>
-               <div class="modal-action mt-6">
-                <button type="submit" class="btn btn-primary w-full text-lg">Save User</button>
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-semibold">Password</span></label>
+                    <input type="password" name="password" class="input input-bordered w-full" required />
                 </div>
-                </form>
-               </div>
-                </dialog>
+                <!-- Confirm Password Field added previously -->
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-semibold">Confirm Password</span></label>
+                    <input type="password" name="confirm_password" class="input input-bordered w-full" required />
+                </div>
+                <div class="modal-action mt-6">
+                    <button type="submit" class="btn btn-primary w-full text-lg">Save User</button>
+                </div>
+            </form>
+        </div>
+    </dialog>
 
     <!-- IN-PAGE MODAL: EDIT USER -->
     <dialog id="edit_user_modal" class="modal">
@@ -164,7 +210,6 @@ include 'initialize.php';
             <h3 class="font-bold text-2xl mb-6">Edit User</h3>
             
             <form action="user_edit_data.php" method="POST" class="space-y-4">
-                <!-- Hidden input passes the ID to your existing POST handler -->
                 <input type="hidden" name="user-id" id="edit_id">
                 
                 <div class="form-control">
@@ -189,15 +234,10 @@ include 'initialize.php';
     <!-- JavaScript to populate the Edit Modal dynamically -->
     <script>
     function openEditModal(id, username, firstname, lastname) {
-        // Fill the hidden ID input so the PHP script knows who to update
         document.getElementById('edit_id').value = id;
-        
-        // Pre-fill the visible text inputs so the user sees their current data
         document.getElementById('edit_username').value = username;
         document.getElementById('edit_firstname').value = firstname;
         document.getElementById('edit_lastname').value = lastname;
-        
-        // Open the DaisyUI modal
         document.getElementById('edit_user_modal').showModal();
     }
     </script>
