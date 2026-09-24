@@ -6,25 +6,17 @@ if (!isset($_COOKIE['lab12_user_id'])) {
 include 'initialize.php';
 
 // --- SEARCH & PAGINATION SETUP ---
-// 1. Get the current search term if there is one
-$search = isset($_GET['search']) ? mysqli_real_escape_string($connection, $_GET['search']) : '';
-
-// 2. Figure out what page we are on (default to 1)
+$search = isset($_GET['search']) ? mysqli_real_escape_string($connection,$_GET['search']) : '';
 $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 1;
-$limit = 10; // Show 10 people at a time
-$offset = ($page - 1) * $limit;
+$limit = 10;
+$offset = ($page - 1) *$limit;
 
-// 3. Build the search filter for our SQL queries
 $whereClause = "";
-if (!empty($search)) {
-    $whereClause = "WHERE username LIKE '%$search%' OR firstname LIKE '%$search%' OR lastname LIKE '%$search%'";
+if (!empty($search)) {$whereClause = "WHERE username LIKE '%$search%' OR firstname LIKE '%$search\%' OR lastname LIKE '\%$search%'";
 }
 
-// 4. Count total users (so we know how many page numbers to generate)
 $countQuery = "SELECT COUNT(*) as total FROM users $whereClause";
-$countResult = mysqli_query($connection, $countQuery);
-$totalRecords = mysqli_fetch_assoc($countResult)['total'];
-$totalPages = ceil($totalRecords / $limit);
+$countResult = mysqli_query($connection, $countQuery);$totalRecords = mysqli_fetch_assoc($countResult)['total'];$totalPages = ceil($totalRecords / $limit);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -40,7 +32,6 @@ $totalPages = ceil($totalRecords / $limit);
     <!-- Sidebar Panel -->
     <aside class="w-64 bg-base-100 shadow-2xl flex flex-col justify-between h-screen sticky top-0 border-r border-base-300">
         <div>
-            <!-- Brand / User Info -->
             <div class="p-6 border-b border-base-300 bg-primary/5">
                 <h2 class="text-2xl font-black text-primary">Admin Panel</h2>
                 <p class="text-sm mt-3 text-base-content/80">
@@ -48,8 +39,6 @@ $totalPages = ceil($totalRecords / $limit);
                     <span class="font-bold text-lg text-base-content"><?php echo htmlspecialchars($_COOKIE['lab12_username']); ?></span>
                 </p>
             </div>
-
-            <!-- Sidebar Navigation -->
             <ul class="menu p-4 w-full gap-2 text-base">
                 <li>
                     <a href="user_records.php" class="active bg-primary text-primary-content shadow-sm">Dashboard</a>
@@ -61,8 +50,6 @@ $totalPages = ceil($totalRecords / $limit);
                 </li>
             </ul>
         </div>
-
-        <!-- Bottom Logout -->
         <div class="p-4 border-t border-base-300">
             <a href="logout.php" class="btn btn-error btn-outline w-full font-bold">Logout</a>
         </div>
@@ -71,12 +58,10 @@ $totalPages = ceil($totalRecords / $limit);
     <!-- Main Dashboard Content -->
     <main class="flex-1 p-10 overflow-y-auto">
         <div class="max-w-5xl mx-auto">
-            <!-- Page Header -->
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-3xl font-bold">User Records</h2>
             </div>
 
-            <!-- Alerts -->
             <?php if (isset($_GET['msg'])): ?>
                 <div class="alert alert-success shadow-lg rounded-xl mb-6 text-white">
                     <span><?php echo htmlspecialchars($_GET['msg']); ?></span>
@@ -89,14 +74,11 @@ $totalPages = ceil($totalRecords / $limit);
                 </div>
             <?php endif; ?>
 
-            <!-- Search Bar -->
-            <form method="GET" action="user_records.php" class="flex gap-2 mb-6">
-                <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>" placeholder="Search by name or username..." class="input input-bordered w-full max-w-md" />
-                <button type="submit" class="btn btn-primary">Search</button>
-                <?php if(!empty($search)): ?>
-                    <a href="user_records.php" class="btn btn-outline">Clear</a>
-                <?php endif; ?>
-            </form>
+            <!-- Live Search Bar -->
+            <div class="flex gap-2 mb-6">
+                <!-- Removed the form tags so it doesn't reload the page on Enter -->
+                <input type="text" id="searchInput" value="<?php echo htmlspecialchars($search); ?>" placeholder="Type to search users..." class="input input-bordered w-full max-w-md" autocomplete="off" />
+            </div>
 
             <!-- Data Table -->
             <div class="card bg-base-100 shadow-xl border border-base-300">
@@ -111,11 +93,11 @@ $totalPages = ceil($totalRecords / $limit);
                                     <th class="text-right">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <!-- Added ID here for JavaScript to target -->
+                            <tbody id="table-body">
                                 <?php
-                                // 5. Get the actual users, alphabetized (ASC), with limits applied
-                                $query = "SELECT * FROM users $whereClause ORDER BY username ASC LIMIT $limit OFFSET $offset";
-                                $result = mysqli_query($connection, $query);
+                                $query = "SELECT * FROM users $whereClause ORDER BY username ASC LIMIT $limit OFFSET$offset";
+                                $result = mysqli_query($connection,$query);
                                 
                                 if (mysqli_num_rows($result) > 0) {
                                     while ($row = mysqli_fetch_assoc($result)) {
@@ -126,12 +108,11 @@ $totalPages = ceil($totalRecords / $limit);
                                         
                                         echo "<td class='text-right space-x-2'>";
                                         
-                                        $id = $row['id'];
+                                        $id =$row['id'];
                                         $username = addslashes($row['username']);
                                         $firstname = addslashes($row['firstname']);
                                         $lastname = addslashes($row['lastname']);
                                         
-                                        // Edit & Delete Buttons
                                         echo "<button type='button' onclick=\"openEditModal($id, '$username', '$firstname', '$lastname')\" class='btn btn-warning btn-sm'>Edit</button>";
                                         echo "<a href='user_delete.php?user-id=" . $row['id'] . "' class='btn btn-error btn-sm' onclick=\"return confirm('Are you sure you want to delete this user?');\">Delete</a>";
                                         echo "</td>";
@@ -147,19 +128,21 @@ $totalPages = ceil($totalRecords / $limit);
                 </div>
             </div>
 
-            <!-- Pagination (The numbers underneath) -->
-            <?php if ($totalPages > 1): ?>
-            <div class="flex justify-center mt-8">
-                <div class="join">
-                    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                        <a href="?page=<?php echo $i; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>" 
-                           class="join-item btn <?php echo $i === $page ? 'btn-active' : ''; ?>">
-                            <?php echo $i; ?>
-                        </a>
-                    <?php endfor; ?>
+            <!-- Pagination Wrapper for JavaScript -->
+            <div id="pagination-wrapper">
+                <?php if ($totalPages > 1): ?>
+                <div class="flex justify-center mt-8">
+                    <div class="join">
+                        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                            <a href="?page=<?php echo $i; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>" 
+                               class="join-item btn <?php echo $i ===$page ? 'btn-active' : ''; ?>">
+                                <?php echo $i; ?>
+                            </a>
+                        <?php endfor; ?>
+                    </div>
                 </div>
+                <?php endif; ?>
             </div>
-            <?php endif; ?>
 
         </div>
     </main>
@@ -171,7 +154,6 @@ $totalPages = ceil($totalRecords / $limit);
                 <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
             </form>
             <h3 class="font-bold text-2xl mb-6">Add New User</h3>
-            
             <form action="user_add_data.php" method="POST" class="space-y-4">
                 <div class="form-control">
                     <label class="label"><span class="label-text font-semibold">Username</span></label>
@@ -189,7 +171,6 @@ $totalPages = ceil($totalRecords / $limit);
                     <label class="label"><span class="label-text font-semibold">Password</span></label>
                     <input type="password" name="password" class="input input-bordered w-full" required />
                 </div>
-                <!-- Confirm Password Field added previously -->
                 <div class="form-control">
                     <label class="label"><span class="label-text font-semibold">Confirm Password</span></label>
                     <input type="password" name="confirm_password" class="input input-bordered w-full" required />
@@ -208,10 +189,8 @@ $totalPages = ceil($totalRecords / $limit);
                 <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
             </form>
             <h3 class="font-bold text-2xl mb-6">Edit User</h3>
-            
             <form action="user_edit_data.php" method="POST" class="space-y-4">
                 <input type="hidden" name="user-id" id="edit_id">
-                
                 <div class="form-control">
                     <label class="label"><span class="label-text font-semibold">Username</span></label>
                     <input type="text" name="username" id="edit_username" class="input input-bordered w-full" required />
@@ -231,8 +210,8 @@ $totalPages = ceil($totalRecords / $limit);
         </div>
     </dialog>
 
-    <!-- JavaScript to populate the Edit Modal dynamically -->
     <script>
+    // EDIT MODAL FUNCTION
     function openEditModal(id, username, firstname, lastname) {
         document.getElementById('edit_id').value = id;
         document.getElementById('edit_username').value = username;
@@ -240,6 +219,41 @@ $totalPages = ceil($totalRecords / $limit);
         document.getElementById('edit_lastname').value = lastname;
         document.getElementById('edit_user_modal').showModal();
     }
+
+    // LIVE SEARCH FUNCTION
+    let typingTimer;
+    const searchInput = document.getElementById('searchInput');
+
+    searchInput.addEventListener('input', function() {
+        // Clear the timer every time the user hits a key
+        clearTimeout(typingTimer);
+        
+        // Wait 300ms after they stop typing before asking the database
+        typingTimer = setTimeout(() => {
+            const searchTerm = searchInput.value;
+            
+            // Update the URL in the browser without reloading the page
+            const newUrl = new URL(window.location);
+            newUrl.searchParams.set('search', searchTerm);
+            newUrl.searchParams.set('page', 1); // Reset to page 1 on new search
+            window.history.pushState({}, '', newUrl);
+
+            // Fetch the new HTML in the background
+            fetch(`user_records.php?search=${encodeURIComponent(searchTerm)}`)
+                .then(response => response.text())
+                .then(html => {
+                    // Convert the HTML string into an actual DOM we can read
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    
+                    // Swap out the table body
+                    document.getElementById('table-body').innerHTML = doc.getElementById('table-body').innerHTML;
+                    
+                    // Swap out the pagination numbers
+                    document.getElementById('pagination-wrapper').innerHTML = doc.getElementById('pagination-wrapper').innerHTML;
+                });
+        }, 300);
+    });
     </script>
 </body>
 </html>
