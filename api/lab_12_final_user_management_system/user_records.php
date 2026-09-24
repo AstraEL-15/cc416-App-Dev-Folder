@@ -96,7 +96,7 @@ $countResult = mysqli_query($connection, $countQuery);$totalRecords = mysqli_fet
                             <!-- Added ID here for JavaScript to target -->
                             <tbody id="table-body">
                                 <?php
-                                $query = "SELECT * FROM users $whereClause ORDER BY username ASC LIMIT $limit OFFSET$offset";
+                               $query = "SELECT * FROM users $whereClause ORDER BY username ASC LIMIT $offset, $limit";
                                 $result = mysqli_query($connection,$query);
                                 
                                 if (mysqli_num_rows($result) > 0) {
