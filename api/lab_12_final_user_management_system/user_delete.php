@@ -1,5 +1,8 @@
 <?php
-if (!isset($_COOKIE['lab12_user_id'])) { header('Location: login.php'); exit; }
+if (!isset($_COOKIE['lab12_user_id'])) {
+    header('Location: login.php');
+    exit;
+}
 include 'initialize.php';
 
 $user_id = $_GET['user-id'] ?? '';
@@ -22,4 +25,3 @@ if (!empty($user_id)) {
 }
 header('Location: user_records.php');
 exit;
-?>

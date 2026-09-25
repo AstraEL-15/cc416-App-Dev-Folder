@@ -4,6 +4,7 @@ include 'initialize.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,6 +12,7 @@ include 'initialize.php';
     <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.0/dist/full.css" rel="stylesheet" type="text/css" />
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="bg-base-200 min-h-screen flex items-center justify-center">
 
     <div class="card w-96 bg-base-100 shadow-xl">
@@ -59,4 +61,5 @@ include 'initialize.php';
     </div>
 
 </body>
+
 </html>

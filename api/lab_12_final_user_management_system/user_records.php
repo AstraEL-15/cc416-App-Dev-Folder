@@ -6,20 +6,24 @@ if (!isset($_COOKIE['lab12_user_id'])) {
 include 'initialize.php';
 
 // --- SEARCH & PAGINATION SETUP ---
-$search = isset($_GET['search']) ? mysqli_real_escape_string($connection,$_GET['search']) : '';
+$search = isset($_GET['search']) ? mysqli_real_escape_string($connection, $_GET['search']) : '';
 $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 1;
 $limit = 10;
-$offset = ($page - 1) *$limit;
+$offset = ($page - 1) * $limit;
 
 $whereClause = "";
-if (!empty($search)) {$whereClause = "WHERE username LIKE '%$search%' OR firstname LIKE '%$search\%' OR lastname LIKE '\%$search%'";
+if (!empty($search)) {
+    $whereClause = "WHERE username LIKE '%$search%' OR firstname LIKE '%$search%' OR lastname LIKE '%$search%'";
 }
 
 $countQuery = "SELECT COUNT(*) as total FROM users $whereClause";
-$countResult = mysqli_query($connection, $countQuery);$totalRecords = mysqli_fetch_assoc($countResult)['total'];$totalPages = ceil($totalRecords / $limit);
+$countResult = mysqli_query($connection, $countQuery);
+$totalRecords = mysqli_fetch_assoc($countResult)['total'];
+$totalPages = ceil($totalRecords / $limit);
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,6 +31,7 @@ $countResult = mysqli_query($connection, $countQuery);$totalRecords = mysqli_fet
     <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.0/dist/full.css" rel="stylesheet" type="text/css" />
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="bg-base-200 min-h-screen flex">
 
     <!-- Sidebar Panel -->
@@ -57,15 +62,37 @@ $countResult = mysqli_query($connection, $countQuery);$totalRecords = mysqli_fet
 
     <!-- Main Dashboard Content -->
     <main class="flex-1 p-10 overflow-y-auto flex flex-col">
-       <div class="max-w-5xl mx-auto w-full flex-1 flex flex-col">
+        <div class="max-w-5xl mx-auto w-full flex-1 flex flex-col">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-3xl font-bold">User Records</h2>
             </div>
 
-            <?php if (isset($_GET['msg'])): ?>
-                <div class="alert alert-success shadow-lg rounded-xl mb-6 text-white">
-                    <span><?php echo htmlspecialchars($_GET['msg']); ?></span>
+            <!-- Auto-Dismissing Toast Notification -->
+            <?php if (isset($_GET['msg']) || isset($_GET['error'])): ?>
+                <div id="toast-notification" class="toast toast-bottom toast-end z-50 transition-opacity duration-500 ease-in-out">
+                    <?php if (isset($_GET['msg'])): ?>
+                        <div class="alert alert-success text-white shadow-xl rounded-xl border border-white/20">
+                            <span><?php echo htmlspecialchars($_GET['msg']); ?></span>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if (isset($_GET['error'])): ?>
+                        <div class="alert alert-error text-white shadow-xl rounded-xl border border-white/20">
+                            <span><?php echo htmlspecialchars($_GET['error']); ?></span>
+                        </div>
+                    <?php endif; ?>
                 </div>
+
+                <script>
+                    // Auto-hide the toast after 3 seconds
+                    setTimeout(() => {
+                        const toast = document.getElementById('toast-notification');
+                        if (toast) {
+                            toast.style.opacity = '0';
+                            setTimeout(() => toast.remove(), 500); // Remove element after fade transition
+                        }
+                    }, 3000);
+                </script>
             <?php endif; ?>
 
             <?php if (isset($_GET['error'])): ?>
@@ -76,7 +103,6 @@ $countResult = mysqli_query($connection, $countQuery);$totalRecords = mysqli_fet
 
             <!-- Live Search Bar -->
             <div class="flex gap-2 mb-6">
-                <!-- Removed the form tags so it doesn't reload the page on Enter -->
                 <input type="text" id="searchInput" value="<?php echo htmlspecialchars($search); ?>" placeholder="Type to search users..." class="input input-bordered w-full max-w-md" autocomplete="off" />
             </div>
 
@@ -93,26 +119,25 @@ $countResult = mysqli_query($connection, $countQuery);$totalRecords = mysqli_fet
                                     <th class="text-right">Actions</th>
                                 </tr>
                             </thead>
-                            <!-- Added ID here for JavaScript to target -->
                             <tbody id="table-body">
                                 <?php
-                               $query = "SELECT * FROM users $whereClause ORDER BY username ASC LIMIT $offset, $limit";
-                                $result = mysqli_query($connection,$query);
-                                
+                                $query = "SELECT * FROM users $whereClause ORDER BY username ASC LIMIT $offset,$limit";
+                                $result = mysqli_query($connection, $query);
+
                                 if (mysqli_num_rows($result) > 0) {
                                     while ($row = mysqli_fetch_assoc($result)) {
                                         echo "<tr>";
                                         echo "<td class='font-medium'>" . htmlspecialchars($row['username']) . "</td>";
                                         echo "<td>" . htmlspecialchars($row['firstname']) . "</td>";
                                         echo "<td>" . htmlspecialchars($row['lastname']) . "</td>";
-                                        
+
                                         echo "<td class='text-right space-x-2'>";
-                                        
-                                        $id =$row['id'];
+
+                                        $id = $row['id'];
                                         $username = addslashes($row['username']);
                                         $firstname = addslashes($row['firstname']);
                                         $lastname = addslashes($row['lastname']);
-                                        
+
                                         echo "<button type='button' onclick=\"openEditModal($id, '$username', '$firstname', '$lastname')\" class='btn btn-warning btn-sm'>Edit</button>";
                                         echo "<a href='user_delete.php?user-id=" . $row['id'] . "' class='btn btn-error btn-sm' onclick=\"return confirm('Are you sure you want to delete this user?');\">Delete</a>";
                                         echo "</td>";
@@ -131,16 +156,31 @@ $countResult = mysqli_query($connection, $countQuery);$totalRecords = mysqli_fet
             <!-- Pagination Wrapper for JavaScript -->
             <div id="pagination-wrapper" class="mt-auto pb-4">
                 <?php if ($totalPages > 1): ?>
-                <div class="flex justify-center mt-8">
-                    <div class="join">
-                        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                            <a href="?page=<?php echo $i; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>" 
-                               class="join-item btn <?php echo $i ===$page ? 'btn-active' : ''; ?>">
-                                <?php echo $i; ?>
-                            </a>
-                        <?php endfor; ?>
+                    <div class="flex justify-center mt-8">
+                        <div class="join">
+                            <?php
+                            $window = 2;
+                            $start_page = max(1, $page - $window);
+                            $end_page = min($totalPages, $page + $window);
+
+                            if ($start_page > 1) {
+                                echo "<a href='?page=1" . (!empty($search) ? "&search=" . urlencode($search) : "") . "' class='join-item btn'>1</a>";
+                                if ($start_page > 2) echo "<span class='join-item btn btn-disabled'>...</span>";
+                            }
+
+                            for ($i = $start_page; $i <= $end_page; $i++) {
+                                $active = ($i == $page) ? "btn-active" : "";
+                                $searchQuery = !empty($search) ? "&search=" . urlencode($search) : "";
+                                echo "<a href='?page=$i$searchQuery' class='join-item btn $active'>$i</a>";
+                            }
+
+                            if ($end_page < $totalPages) {
+                                if ($end_page < $totalPages - 1) echo "<span class='join-item btn btn-disabled'>...</span>";
+                                echo "<a href='?page=$totalPages" . (!empty($search) ? "&search=" . urlencode($search) : "") . "' class='join-item btn'>$totalPages</a>";
+                            }
+                            ?>
+                        </div>
                     </div>
-                </div>
                 <?php endif; ?>
             </div>
 
@@ -211,21 +251,21 @@ $countResult = mysqli_query($connection, $countQuery);$totalRecords = mysqli_fet
     </dialog>
 
     <script>
-    // EDIT MODAL FUNCTION
-    function openEditModal(id, username, firstname, lastname) {
-    document.getElementById('edit_id').value = id;
-    document.getElementById('edit_username').value = username;
-    document.getElementById('edit_firstname').value = firstname;
-    document.getElementById('edit_lastname').value = lastname;
-    document.getElementById('edit_user_modal').showModal();
-}
+        // EDIT MODAL FUNCTION
+        function openEditModal(id, username, firstname, lastname) {
+            document.getElementById('edit_id').value = id;
+            document.getElementById('edit_username').value = username;
+            document.getElementById('edit_firstname').value = firstname;
+            document.getElementById('edit_lastname').value = lastname;
+            document.getElementById('edit_user_modal').showModal();
+        }
 
-    // LIVE SEARCH WITH SKELETON LOADING
-    let typingTimer;
-    const searchInput = document.getElementById('searchInput');
+        // LIVE SEARCH WITH SKELETON LOADING
+        let typingTimer;
+        const searchInput = document.getElementById('searchInput');
 
-    // 1. Define what our skeleton rows look like
-    const skeletonHTML = `
+        // 1. Define what our skeleton rows look like
+        const skeletonHTML = `
         <tr>
             <td><div class="skeleton h-4 w-32"></div></td>
             <td><div class="skeleton h-4 w-24"></div></td>
@@ -233,46 +273,47 @@ $countResult = mysqli_query($connection, $countQuery);$totalRecords = mysqli_fet
             <td class="text-right space-x-2">
              <div class="skeleton h-8 w-12 inline-block rounded-lg"></div>
              <div class="skeleton h-8 w-16 inline-block rounded-lg"></div>
-        </td>
-    </tr>
-`.repeat(5); // Show 5 fake rows while loading
+            </td>
+        </tr>
+    `.repeat(5); // Show 5 fake rows while loading
 
-searchInput.addEventListener('input', function() {
-    clearTimeout(typingTimer);
-    
-    // 2. Immediately show skeletons and fade pagination
-    document.getElementById('table-body').innerHTML = skeletonHTML;
-    document.getElementById('pagination-wrapper').style.opacity = '0.5';
-    document.getElementById('pagination-wrapper').style.pointerEvents = 'none'; // Prevent clicking
-    
-    // 3. Wait 300ms before fetching new data
-    typingTimer = setTimeout(() => {
-        const searchTerm = searchInput.value;
-        
-        // Update URL
-        const newUrl = new URL(window.location);
-        newUrl.searchParams.set('search', searchTerm);
-        newUrl.searchParams.set('page', 1);
-        window.history.pushState({}, '', newUrl);
+        searchInput.addEventListener('input', function() {
+            clearTimeout(typingTimer);
 
-        // Fetch real data
-        fetch(`user_records.php?search=${encodeURIComponent(searchTerm)}`)
-            .then(response => response.text())
-            .then(html => {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                
-                // Swap skeletons for real data
-                document.getElementById('table-body').innerHTML = doc.getElementById('table-body').innerHTML;
-                
-                // Restore pagination
-                const paginationWrap = document.getElementById('pagination-wrapper');
-                paginationWrap.innerHTML = doc.getElementById('pagination-wrapper').innerHTML;
-                paginationWrap.style.opacity = '1';
-                paginationWrap.style.pointerEvents = 'auto';
-            });
-    }, 300);
-});
-</script>
+            // 2. Immediately show skeletons and fade pagination
+            document.getElementById('table-body').innerHTML = skeletonHTML;
+            document.getElementById('pagination-wrapper').style.opacity = '0.5';
+            document.getElementById('pagination-wrapper').style.pointerEvents = 'none'; // Prevent clicking
+
+            // 3. Wait 300ms before fetching new data
+            typingTimer = setTimeout(() => {
+                const searchTerm = searchInput.value;
+
+                // Update URL
+                const newUrl = new URL(window.location);
+                newUrl.searchParams.set('search', searchTerm);
+                newUrl.searchParams.set('page', 1);
+                window.history.pushState({}, '', newUrl);
+
+                // Fetch real data
+                fetch(`user_records.php?search=${encodeURIComponent(searchTerm)}`)
+                    .then(response => response.text())
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+
+                        // Swap skeletons for real data
+                        document.getElementById('table-body').innerHTML = doc.getElementById('table-body').innerHTML;
+
+                        // Restore pagination
+                        const paginationWrap = document.getElementById('pagination-wrapper');
+                        paginationWrap.innerHTML = doc.getElementById('pagination-wrapper').innerHTML;
+                        paginationWrap.style.opacity = '1';
+                        paginationWrap.style.pointerEvents = 'auto';
+                    });
+            }, 300);
+        });
+    </script>
 </body>
+
 </html>

@@ -1,7 +1,7 @@
 <?php
-if (!isset($_COOKIE['lab12_user_id'])) { 
-    header('Location: login.php'); 
-    exit; 
+if (!isset($_COOKIE['lab12_user_id'])) {
+    header('Location: login.php');
+    exit;
 }
 include 'initialize.php';
 
@@ -22,17 +22,19 @@ if (!$row) {
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Edit User</title>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.0/dist/full.css" rel="stylesheet" type="text/css" />
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="bg-base-200 min-h-screen flex items-center justify-center p-4">
     <div class="card w-full max-w-md bg-base-100 shadow-xl">
         <div class="card-body">
             <h2 class="card-title justify-center text-2xl mb-4">Update User</h2>
-            
+
             <?php if (isset($_GET['error'])): ?>
                 <div class="alert alert-error shadow-lg rounded-xl mb-4 text-white text-sm">
                     <span><?php echo htmlspecialchars($_GET['error']); ?></span>
@@ -70,4 +72,5 @@ if (!$row) {
         </div>
     </div>
 </body>
+
 </html>

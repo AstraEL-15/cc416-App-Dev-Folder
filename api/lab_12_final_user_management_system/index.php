@@ -8,4 +8,3 @@ if (isset($_COOKIE['lab12_user_id'])) {
     header('Location: login.php');
     exit;
 }
-?>
